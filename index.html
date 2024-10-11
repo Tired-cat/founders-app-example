@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumping Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB, #fff);
+        }
+
+        h1 {
+            position: absolute;
+            top: 20px;
+            font-size: 36px;
+            color: #333;
+        }
+
+        .game-container {
+            position: relative;
+            width: 600px;
+            height: 200px;
+            border: 2px solid #000;
+            background-color: #eee;
+            overflow: hidden;
+        }
+
+        .player {
+            position: absolute;
+            bottom: 20px;
+            width: 30px;
+            height: 30px;
+            background-color: #ff6347;
+            border-radius: 10px;
+        }
+
+        .obstacle {
+            position: absolute;
+            bottom: 20px;
+            width: 30px;
+            height: 50px;
+            background-color: #333;
+            animation: moveObstacle 2s infinite linear;
+        }
+
+        @keyframes moveObstacle {
+            0% {
+                right: -30px;
+            }
+            100% {
+                right: 100%;
+            }
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            background-color: #8B4513;
+        }
+
+        .message {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            color: red;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Jumping Game</h1>
+
+<div class="game-container">
+    <div class="player" id="player"></div>
+    <div class="obstacle" id="obstacle"></div>
+    <div class="ground"></div>
+    <div class="message" id="message">Game Over! Press Space to Restart</div>
+</div>
+
+<script>
+    const player = document.getElementById("player");
+    const obstacle = document.getElementById("obstacle");
+    const message = document.getElementById("message");
+
+    let isJumping = false;
+    let isGameOver = false;
+
+    document.addEventListener("keydown", function(event) {
+        if (event.code === "Space" && !isJumping) {
+            if (isGameOver) {
+                restartGame();
+            } else {
+                jump();
+            }
+        }
+    });
+
+    function jump() {
+        isJumping = true;
+        let jumpHeight = 0;
+        let jumpUpInterval = setInterval(() => {
+            if (jumpHeight >= 150) { // Increased jump height
+                clearInterval(jumpUpInterval);
+                let fallDownInterval = setInterval(() => {
+                    if (jumpHeight <= 0) {
+                        clearInterval(fallDownInterval);
+                        isJumping = false;
+                    } else {
+                        jumpHeight -= 5;
+                        player.style.bottom = jumpHeight + "px";
+                    }
+                }, 20);
+            } else {
+                jumpHeight += 5;
+                player.style.bottom = jumpHeight + "px";
+            }
+        }, 20);
+    }
+
+    function checkCollision() {
+        const playerRect = player.getBoundingClientRect();
+        const obstacleRect = obstacle.getBoundingClientRect();
+
+        // Check if the player and obstacle are overlapping both horizontally and vertically
+        if (obstacleRect.left < playerRect.right &&
+            obstacleRect.right > playerRect.left &&
+            obstacleRect.bottom > playerRect.top &&
+            obstacleRect.top < playerRect.bottom) {
+            gameOver();
+        }
+    }
+
+    function gameOver() {
+        obstacle.style.animationPlayState = "paused";
+        message.style.visibility = "visible";
+        isGameOver = true;
+    }
+
+    function restartGame() {
+        obstacle.style.animationPlayState = "running";
+        message.style.visibility = "hidden";
+        isGameOver = false;
+    }
+
+    setInterval(checkCollision, 10);
+</script>
+
+</body>
+</html>
